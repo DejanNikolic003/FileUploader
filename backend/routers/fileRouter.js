@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   createFile,
   deleteFileById,
+  downloadFile,
   showFilesByFolderId,
   showFilesByUserId,
 } from "../controllers/fileController.js";
@@ -22,6 +23,7 @@ const upload = multer({
 });
 
 fileRouter.post("/upload", upload.array("file", 10), createFile);
-fileRouter.get("/folder/:id", showFilesByFolderId);
+fileRouter.get("/folders/:id", showFilesByFolderId);
 fileRouter.delete("/:id", deleteFileById);
+fileRouter.get("/:id", downloadFile);
 fileRouter.get("/", showFilesByUserId);
