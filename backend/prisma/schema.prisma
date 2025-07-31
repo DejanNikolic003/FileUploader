@@ -23,6 +23,7 @@ model User {
   created_at DateTime @default(now())
 
   folders Folder[]
+  File    File[]
 
   @@map("users")
 }
@@ -45,6 +46,8 @@ model File {
   link       String   @db.VarChar(255)
   folder     Folder?  @relation(fields: [folder_id], references: [id])
   folder_id  Int?     @unique
+  user       User     @relation(fields: [user_id], references: [id])
+  user_id    Int
   created_at DateTime @default(now())
 
   @@map("files")
