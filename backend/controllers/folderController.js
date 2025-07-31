@@ -33,10 +33,19 @@ export const showFolders = async (req, res) => {
 
 export const showFolderById = async (req, res) => {
   try {
-    const { id } = req.params;
-    const folder = await model.getFolderById(Number(id));
+    const { id, is_admin } = req.user;
+    const folderId = req.params.id;
+    const folder = await model.getFolderById(Number(folderId));
 
-    if (!folder) return;
+    if (!folder) {
+      return res.status(404).json({ message: "Folder not found!" });
+    }
+
+    if (folder.user_id !== id && !is_admin) {
+      return res
+        .status(403)
+        .json({ message: "You don't have access to view this! " });
+    }
 
     res.status(200).json({ folder });
   } catch (error) {
