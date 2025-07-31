@@ -1,0 +1,58 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  username   String   @db.VarChar(255)
+  password   String   @db.VarChar(255)
+  email      String   @db.VarChar(255)
+  is_admin   Boolean  @default(false)
+  created_at DateTime @default(now())
+
+  folders Folder[]
+
+  @@map("users")
+}
+
+model Folder {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(50)
+  user       User     @relation(fields: [user_id], references: [id])
+  user_id    Int
+  created_at DateTime @default(now())
+
+  files File[]
+
+  @@map("folders")
+}
+
+model File {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(50)
+  link       String   @db.VarChar(255)
+  folder     Folder?  @relation(fields: [folder_id], references: [id])
+  folder_id  Int?     @unique
+  created_at DateTime @default(now())
+
+  @@map("files")
+}
+
+model Session {
+  id        String   @id
+  sid       String   @unique
+  data      String   @db.MediumText // MediumText may be needed for MySql
+  expiresAt DateTime
+}
