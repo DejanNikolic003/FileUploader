@@ -10,6 +10,7 @@ import { AuthProvider } from "./contexts/AuthProvider.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import { ProtectedRoute } from "./utils/ProtectedRoute.jsx";
 import Folders from "./pages/Folders.jsx";
+import Folder from "./pages/Folder.jsx";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
   {
     path: "/folders",
     element: <Folders />,
+  },
+  {
+    path: "/folders/:id",
+    element: <Folder />,
   },
 ]);
 

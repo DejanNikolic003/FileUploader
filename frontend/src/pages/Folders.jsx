@@ -6,6 +6,7 @@ import Modal from "./components/Modal";
 import Button from "./components/Button";
 
 import { message } from "antd";
+import { Link } from "react-router";
 
 function Folders() {
   const { token } = useAuth();
@@ -185,7 +186,7 @@ function Folders() {
     }
   };
 
-  // ADD BETTER ERROR HANDLING, ALERTS, ETC..
+  // ADD ADMIN OPTION TO SEE ALL FOLDERS
 
   return (
     <>
@@ -246,7 +247,8 @@ function Folders() {
               </svg>
               <span className="sr-only">Loading...</span>
             </div>
-          ) : folders.length > 0 ? (
+          ) : // REFACTOR SEARCHING | ADD LOADING STATE, NOT FOUND, ETC..
+          folders.length > 0 ? (
             folders
               .filter((folder) => {
                 return search.toLowerCase() === ""
@@ -255,7 +257,7 @@ function Folders() {
               })
               .map((folder) => (
                 <div key={folder.id} className="mb-2 flex items-center gap-1">
-                  <div>{folder.name}</div>
+                  <Link to={`/folders/${folder.id}`}>{folder.name}</Link>
                   <Button
                     text="Delete"
                     onClick={() => deleteFolder(folder.id)}
