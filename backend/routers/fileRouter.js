@@ -1,5 +1,27 @@
 import { Router } from "express";
-import { createFile } from "../controllers/fileController.js";
-export const fileRouter = Router();
+import {
+  createFile,
+  deleteFileById,
+  showFilesByFolderId,
+  showFilesByUserId,
+} from "../controllers/fileController.js";
+import multer from "multer";
+import path from "path";
+import { getFolderById } from "../models/Folder.js";
 
-fileRouter.post("/upload", createFile);
+export const fileRouter = Router();
+const storage = multer.diskStorage({
+  destination: "uploads/",
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+const upload = multer({
+  storage,
+});
+
+fileRouter.post("/upload", upload.array("file", 10), createFile);
+fileRouter.get("/folder/:id", showFilesByFolderId);
+fileRouter.delete("/:id", deleteFileById);
+fileRouter.get("/", showFilesByUserId);
