@@ -1,10 +1,17 @@
 import * as model from "../models/File.js";
 import { getFolderById } from "../models/Folder.js";
 import path from "path";
+import { fileURLToPath } from "url";
 import fs from "fs/promises";
+
+// const __filename = fileURLToPath(import.meta.url);
+// const __dirname = path.dirname(__filename);
+const __dirname = import.meta.dirname;
 
 export const createFile = async (req, res) => {
   try {
+    console.log(req.body);
+
     const { folderId } = req.body;
     const folder = await getFolderById(Number(folderId));
 
@@ -64,6 +71,29 @@ export const deleteFileById = async (req, res) => {
     await model.deleteFileById(fileId);
 
     res.status(200).json({ message: "File successfully deleted!" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const downloadFile = async (req, res) => {
+  try {
+    const { id, is_admin } = req.user;
+    const fileId = req.params.id;
+    const file = await model.getFileById(Number(fileId));
+
+    if (!file) {
+      return res.status(404).json({ message: "File doesn't exists!" });
+    }
+
+    if (file.user_id !== id && !is_admin) {
+      return res
+        .status(403)
+        .json({ message: "You don't have access to download this! " });
+    }
+
+    const filePath = path.join(__dirname, "..", "uploads", file.name);
+    res.download(filePath);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
