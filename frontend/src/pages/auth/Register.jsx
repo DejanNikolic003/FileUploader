@@ -23,35 +23,25 @@ function Register() {
     }));
   };
 
-  const submitForm = () => {
-    console.log("Test changed");
-    navigate("/login");
-    // try {
-    //   const request = await fetch(`${API_URL}/register`, {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify({
-    //       username: form.username,
-    //       email: form.email,
-    //       password: form.password,
-    //     }),
-    //   });
+  const submitForm = async () => {
+    try {
+      const request = await fetch(`${API_URL}/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: form.username,
+          email: form.email,
+          password: form.password,
+        }),
+      });
 
-    //   const response = await request.json();
-
-    //   setMessage({
-    //     type: "success",
-    //     text: response.message,
-    //   });
-    // } catch (error) {
-    //   console.log(error);
-    //   setMessage({
-    //     type: "error",
-    //     text: error.message,
-    //   });
-    // }
+      const response = await request.json();
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
