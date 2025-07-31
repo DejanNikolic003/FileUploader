@@ -22,8 +22,8 @@ model User {
   is_admin   Boolean  @default(false)
   created_at DateTime @default(now())
 
-  folders Folder[]
-  File    File[]
+  folders Folder[] @relation("UserFolders")
+  files   File[]   @relation("UserFiles")
 
   @@map("users")
 }
@@ -31,31 +31,27 @@ model User {
 model Folder {
   id         Int      @id @default(autoincrement())
   name       String   @db.VarChar(50)
-  user       User     @relation(fields: [user_id], references: [id])
+  user       User     @relation("UserFolders", fields: [user_id], references: [id])
   user_id    Int
   created_at DateTime @default(now())
 
-  files File[]
+  files File[] @relation("FolderFiles")
 
   @@map("folders")
 }
 
 model File {
-  id         Int      @id @default(autoincrement())
-  name       String   @db.VarChar(50)
-  link       String   @db.VarChar(255)
-  folder     Folder?  @relation(fields: [folder_id], references: [id])
-  folder_id  Int?     @unique
-  user       User     @relation(fields: [user_id], references: [id])
-  user_id    Int
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(50)
+  link String @db.VarChar(255)
+
+  folder    Folder @relation("FolderFiles", fields: [folder_id], references: [id])
+  folder_id Int
+
+  user    User @relation("UserFiles", fields: [user_id], references: [id])
+  user_id Int
+
   created_at DateTime @default(now())
 
   @@map("files")
-}
-
-model Session {
-  id        String   @id
-  sid       String   @unique
-  data      String   @db.MediumText // MediumText may be needed for MySql
-  expiresAt DateTime
 }
