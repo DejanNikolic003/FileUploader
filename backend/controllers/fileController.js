@@ -1,17 +1,13 @@
 import * as model from "../models/File.js";
 import { getFolderById } from "../models/Folder.js";
 import path from "path";
-import { fileURLToPath } from "url";
 import fs from "fs/promises";
 
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
 const __dirname = import.meta.dirname;
 
 export const createFile = async (req, res) => {
   try {
-    console.log(req.body);
-
+    const { id } = req.user;
     const { folderId } = req.body;
     const folder = await getFolderById(Number(folderId));
 
@@ -23,12 +19,12 @@ export const createFile = async (req, res) => {
 
     const file = await model.create(
       req.files[0].filename,
-      "",
-      1,
+      req.originalName,
+      Number(id),
       Number(folderId)
     );
 
-    res.status(200).json({ message: "Successfully uploaded!" });
+    res.status(200).json({ file, message: "Successfully uploaded!" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -93,6 +89,7 @@ export const downloadFile = async (req, res) => {
     }
 
     const filePath = path.join(__dirname, "..", "uploads", file.name);
+
     res.download(filePath);
   } catch (error) {
     res.status(500).json({ message: error.message });
