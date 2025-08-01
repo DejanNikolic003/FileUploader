@@ -30,8 +30,6 @@ export const generateToken = (userId, type = "access") => {
 export const authenticateToken = async (req, res) => {
   const { authorization } = req.headers;
 
-  console.log(req.headers);
-
   if (!authorization) {
     throw new Error("Authorization header is missing.");
   }
