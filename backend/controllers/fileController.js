@@ -12,8 +12,7 @@ export const createFile = async (req, res) => {
     const folder = await getFolderById(Number(folderId));
 
     if (!folder || folder.user_id !== req.user.id) {
-      const filePath = path.join("uploads", req.files[0].filename);
-      await fs.unlink(filePath);
+      deleteFile(file.name);
       throw Error("Folder doesn't exists or you dont have access!");
     }
 
@@ -64,6 +63,7 @@ export const deleteFileById = async (req, res) => {
         .json({ message: "You don't have access to delete this! " });
     }
 
+    deleteFile(file.name);
     await model.deleteFileById(fileId);
 
     res.status(200).json({ message: "File successfully deleted!" });
@@ -82,6 +82,12 @@ export const downloadFile = async (req, res) => {
       return res.status(404).json({ message: "File doesn't exists!" });
     }
 
+    const fileExists = await doesFileExists(file.name);
+
+    if (!fileExists) {
+      return res.status(404).json({ message: "File doesn't exist on disk!" });
+    }
+
     if (file.user_id !== id && !is_admin) {
       return res
         .status(403)
@@ -92,6 +98,31 @@ export const downloadFile = async (req, res) => {
 
     res.download(filePath);
   } catch (error) {
+    console.log(error.message);
     res.status(500).json({ message: error.message });
+  }
+};
+
+export const deleteAllFilesByFolderId = async (folderId) => {
+  const files = await model.getAllFilesByFolderId(folderId);
+
+  files.map((file) => deleteFile(file.name));
+
+  await model.deleteAllFilesByFolderId(folderId);
+};
+
+const deleteFile = async (fileName) => {
+  const filePath = path.join("uploads", fileName);
+  await fs.unlink(filePath);
+};
+
+const doesFileExists = async (fileName) => {
+  const filePath = path.join("uploads", fileName);
+
+  try {
+    await fs.access(filePath);
+    return true;
+  } catch (error) {
+    return false;
   }
 };
