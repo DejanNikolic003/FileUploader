@@ -1,10 +1,10 @@
 import { prisma } from "../prisma/prisma.js";
 
-export const create = async (name, link, userId, folderId = null) => {
+export const create = async (name, originalName, userId, folderId = null) => {
   const file = await prisma.file.create({
     data: {
       name,
-      link,
+      original_name: originalName,
       user_id: userId,
       folder_id: folderId,
     },
