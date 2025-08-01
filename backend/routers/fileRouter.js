@@ -15,6 +15,8 @@ const storage = multer.diskStorage({
   destination: "uploads/",
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    req.originalName = file.originalname;
+
     cb(null, uniqueSuffix + path.extname(file.originalname));
   },
 });
