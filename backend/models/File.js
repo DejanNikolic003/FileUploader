@@ -48,3 +48,11 @@ export const getFileById = async (id) => {
     },
   });
 };
+
+export const deleteAllFilesByFolderId = async (folderId) => {
+  return await prisma.file.deleteMany({
+    where: {
+      folder_id: folderId,
+    },
+  });
+};
