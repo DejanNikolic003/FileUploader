@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { API_URL } from "../utils/config";
 import { useAuth } from "../contexts/AuthContext";
 import { Button } from "antd";
+import Loader from "./components/Loading";
 
 function Folder() {
   const { id } = useParams();
@@ -12,6 +13,8 @@ function Folder() {
   const [folder, setFolder] = useState();
   const [file, setFile] = useState(null);
   const [files, setFiles] = useState([]);
+
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -55,9 +58,10 @@ function Folder() {
     };
 
     fetchData();
-  }, []);
+  }, [token]);
 
   const uploadFile = async () => {
+    setLoading(true);
     try {
       if (!file) {
         return;
@@ -79,6 +83,8 @@ function Folder() {
       console.log(result);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -90,7 +96,7 @@ function Folder() {
     }
   };
 
-  const downloadFile = async ({ id, name }) => {
+  const downloadFile = async ({ id, original_name }) => {
     try {
       const response = await fetch(`${API_URL}/files/${id}`, {
         headers: {
@@ -99,11 +105,12 @@ function Folder() {
       });
 
       const result = await response.blob();
+
       const url = window.URL.createObjectURL(result);
       const downloadLink = document.createElement("a");
 
       downloadLink.href = url;
-      downloadLink.download = name;
+      downloadLink.download = original_name;
       downloadLink.click();
       window.URL.revokeObjectURL(result);
     } catch (error) {
@@ -125,16 +132,20 @@ function Folder() {
                   {new Date(folder.created_at).toLocaleDateString("en-US")}
                 </h2>
               </div>
-              <form>
-                <input type="file" name="file" onChange={onChange}></input>
-                <Button type="primary" onClick={uploadFile}>
-                  Upload file
-                </Button>
-              </form>
+              {loading ? (
+                <Loader />
+              ) : (
+                <form>
+                  <input type="file" name="file" onChange={onChange}></input>
+                  <Button type="primary" onClick={uploadFile}>
+                    Upload file
+                  </Button>
+                </form>
+              )}
               {files &&
                 files.map((item) => (
                   <div key={item.id}>
-                    <p>{item.name}</p>
+                    <p>{item.original_name}</p>
                     <p>
                       Uploaded at:
                       {new Date(item.created_at).toLocaleDateString("en-US")}
