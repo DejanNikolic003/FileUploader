@@ -1,4 +1,5 @@
 import * as model from "../models/Folder.js";
+import { deleteAllFilesByFolderId } from "./fileController.js";
 
 export const createFolder = async (req, res) => {
   try {
@@ -70,6 +71,7 @@ export const deleteFolderById = async (req, res) => {
         .json({ message: "You don't have access to delete this! " });
     }
 
+    await deleteAllFilesByFolderId(folderId);
     await model.deleteFolderById(folderId);
 
     res.status(200).json({ message: "Folder successfully deleted!" });
