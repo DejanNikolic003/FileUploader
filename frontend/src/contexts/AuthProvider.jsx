@@ -9,6 +9,9 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (user && token) return;
 
+    if (location.pathname === "/register" || location.pathname === "/login")
+      return;
+
     const fetchUser = async () => {
       try {
         const request = await fetch(`${API_URL}/token`, {
