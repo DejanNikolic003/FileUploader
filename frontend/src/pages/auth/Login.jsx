@@ -2,10 +2,11 @@ import { useNavigate } from "react-router";
 import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { login } from "../../services/userService";
-import { Button, message } from "antd";
+import { Button } from "antd";
+import { useNotification } from "../../contexts/NotificationContext";
 
 function Login() {
-  const [messageApi, contextHolder] = message.useMessage();
+  const { createNotification } = useNotification();
   const navigate = useNavigate();
 
   const { setUser, setToken } = useAuth();
@@ -32,16 +33,12 @@ function Login() {
 
       navigate("/");
     } catch (error) {
-      messageApi.open({
-        type: "error",
-        content: error.message,
-      });
+      createNotification("error", error.message);
     }
   };
 
   return (
     <>
-      {contextHolder}
       <div className="flex h-screen w-full flex-col items-center justify-center bg-gray-100">
         <h2 className="mb-2 text-5xl uppercase">Login</h2>
 
