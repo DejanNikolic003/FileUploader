@@ -1,23 +1,13 @@
-import { registerUser, loginUser } from "../api/userApi";
+import * as userAPI from "../api/userApi";
 
 export const register = async (formData) => {
-  // eslint-disable-next-line no-useless-catch
-  try {
-    const user = await registerUser(formData);
+  const user = await userAPI.register(formData);
 
-    return user;
-  } catch (error) {
-    throw error;
-  }
+  return user;
 };
 
 export const login = async (formData) => {
-  // eslint-disable-next-line no-useless-catch
-  try {
-    const user = await loginUser(formData);
+  const user = await userAPI.login(formData);
 
-    return user;
-  } catch (error) {
-    throw error;
-  }
+  return user;
 };
