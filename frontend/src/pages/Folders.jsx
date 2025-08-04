@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
-import { API_URL } from "../utils/config";
 import { useAuth } from "../contexts/AuthContext";
 import Modal from "./components/Modal";
-import Button from "./components/Button";
+import { Button } from "antd";
 
-import { message } from "antd";
 import { Link } from "react-router";
 import Loader from "./components/Loading";
+import { useNotification } from "../contexts/NotificationContext";
+import {
+  createFolder,
+  deleteFolderById,
+  editFolderById,
+  getFolders,
+} from "../services/folderService";
+import Item from "./components/Item";
 
 function Folders() {
+  const { createNotification } = useNotification();
   const { token } = useAuth();
-  const [messageApi, contextHolder] = message.useMessage();
-
   const [folders, setFolders] = useState([]);
   const [form, setForm] = useState({
     folderName: "",
@@ -30,160 +35,69 @@ function Folders() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/folders/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.message || "Something went wrong!");
-      }
-
-      setFolders(data.folders);
+      const result = await getFolders(token);
+      setFolders(result);
     } catch (error) {
-      messageApi.open({
-        type: "error",
-        content: error.message,
-      });
+      createNotification("error", error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const createFolder = async () => {
+  const handleChange = (event) =>
+    setForm((prev) => ({
+      ...prev,
+      [event.target.name]: event.target.value,
+    }));
+
+  const handleClick = async () => {
     try {
       if (form.folderName.trim() === "") {
-        return messageApi.open({
-          type: "warning",
-          content: "Folder name cannot be empty!",
-        });
+        return createNotification("warning", "Folder name cannot be empty!");
       }
 
-      const response = await fetch(`${API_URL}/folders/create`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          folderName: form.folderName,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.message || "Something went wrong!");
-      }
+      const result = await createFolder(token, form.folderName);
 
       fetchData();
       setActiveModal("");
       resetForm();
-      messageApi.open({
-        type: "success",
-        content: data.message,
-      });
+      createNotification("success", result.message);
     } catch (error) {
-      messageApi.open({
-        type: "error",
-        content: error.message,
-      });
+      createNotification("error", error.message);
     }
   };
 
-  const deleteFolder = async (folderId) => {
+  const deleteFolder = async (id) => {
     try {
-      const response = await fetch(`${API_URL}/folders/${folderId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.message || "Something went wrong!");
-      }
+      const result = await deleteFolderById(token, id);
 
       fetchData();
-      messageApi.open({
-        type: "success",
-        content: data.message,
-      });
+      createNotification("success", result.message);
     } catch (error) {
-      messageApi.open({
-        type: "error",
-        content: error.message,
-      });
+      createNotification("error", error.message);
     }
   };
 
   const resetForm = () => setForm((prev) => ({ ...prev, folderName: "" }));
 
-  const isSelected = (id) => selectedItems.find((item) => item.id === id);
-
   const getFolderIndex = (id) =>
     selectedItems.findIndex((item) => item.id === id);
 
-  const selectFolder = (folder) => {
-    if (isSelected(folder.id)) {
-      setSelectedItems(selectedItems.filter((item) => item.id !== folder.id));
-      return;
-    }
-
-    setSelectedItems((prev) => [...prev, folder]);
-  };
-
-  const handleChange = (e, folderId) =>
-    setSelectedItems((prev) =>
-      prev.map((item) =>
-        item.id === folderId ? { ...item, name: e.target.value } : item,
-      ),
-    );
-
-  const editFolder = async (folderId) => {
+  const editFolder = async (id) => {
     try {
-      const item = selectedItems[getFolderIndex(folderId)];
+      const item = selectedItems[getFolderIndex(id)];
 
       if (item.name.trim() === "") {
-        return messageApi.open({
-          type: "warning",
-          content: "Folder name cannot be empty!",
-        });
+        return createNotification("warning", "Folder name cannot be empty!");
       }
 
-      const response = await fetch(`${API_URL}/folders/${folderId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          folderName: item.name,
-        }),
-      });
+      const result = await editFolderById(token, id, item.name);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data?.message || "Something went wrong!");
-      }
-
-      setSelectedItems(selectedItems.filter((item) => item.id !== folderId));
+      setSelectedItems(selectedItems.filter((item) => item.id !== id));
       fetchData();
-      messageApi.open({
-        type: "success",
-        content: data.message,
-      });
+      createNotification("success", result.message);
     } catch (error) {
-      messageApi.open({
-        type: "error",
-        content: error.message,
-      });
+      createNotification("error", error.message);
     }
   };
 
@@ -191,7 +105,6 @@ function Folders() {
 
   return (
     <>
-      {contextHolder}
       <Navbar />
       <section className="pt-5">
         <div className="container mx-auto">
@@ -203,30 +116,27 @@ function Folders() {
           >
             <form>
               <input
+                name="folderName"
                 type="text"
                 placeholder="Enter folder name..."
                 className="w-full rounded-md border border-gray-200 p-1 text-sm focus:outline-sky-300"
                 value={form.folderName}
-                onChange={(e) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    folderName: e.target.value,
-                  }))
-                }
+                onChange={handleChange}
               />
               <Button
                 text="Create"
                 classes={"w-full mt-2"}
-                onClick={() => createFolder()}
+                onClick={handleClick}
               />
             </form>
           </Modal>
           <input
+            name="search"
             type="text"
             placeholder="Enter folder name..."
             className="mt-2 mb-2 w-full rounded-md border border-gray-200 p-1 text-sm focus:outline-sky-300"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(event) => setSearch(event.target.value)}
           />
           {loading ? (
             <Loader />
@@ -239,35 +149,22 @@ function Folders() {
                   : folder.name.toLowerCase().includes(search);
               })
               .map((folder) => (
-                <div key={folder.id} className="mb-2 flex items-center gap-1">
+                <Item
+                  key={folder.id}
+                  item={folder}
+                  selectedItems={selectedItems}
+                  setSelectedItems={setSelectedItems}
+                  save={editFolder}
+                >
                   <Link to={`/folders/${folder.id}`}>{folder.name}</Link>
                   <Button
-                    text="Delete"
+                    color="danger"
+                    variant="solid"
                     onClick={() => deleteFolder(folder.id)}
-                    type="danger"
-                  />
-                  <Button
-                    text={isSelected(folder.id) ? "Save" : "Edit"}
-                    onClick={() =>
-                      isSelected(folder.id)
-                        ? editFolder(folder.id)
-                        : selectFolder(folder)
-                    }
-                    type="success"
-                  />
-                  {isSelected(folder.id) && (
-                    <div>
-                      <input
-                        data-id={folder.id}
-                        type="text"
-                        placeholder="Enter folder name..."
-                        className="w-full rounded-md border border-gray-200 p-1 text-sm focus:outline-sky-300"
-                        value={selectedItems[getFolderIndex(folder.id)].name}
-                        onChange={(e) => handleChange(e, folder.id)}
-                      />
-                    </div>
-                  )}
-                </div>
+                  >
+                    Delete
+                  </Button>
+                </Item>
               ))
           ) : (
             <h1>No folders found... :(</h1>
