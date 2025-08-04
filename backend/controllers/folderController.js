@@ -9,9 +9,10 @@ export const createFolder = async (req, res) => {
     if (!req.body.folderName || typeof req.body.folderName !== "string")
       throw new Error("Folder name field required, and must be a string!");
 
+    const { id } = req.user;
     const { folderName } = req.body;
 
-    const folder = await model.create(folderName, 1);
+    const folder = await model.create(folderName, Number(id));
 
     res.status(200).json({ folder, message: "Successfully created!" });
   } catch (error) {
