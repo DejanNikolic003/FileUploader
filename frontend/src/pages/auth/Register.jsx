@@ -1,21 +1,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { register } from "../../services/userService";
-
-import { Button, message } from "antd";
+import { Button } from "antd";
 import { useAuth } from "../../contexts/AuthContext";
+import { useNotification } from "../../contexts/NotificationContext";
 
 function Register() {
-  const [messageApi, contextHolder] = message.useMessage();
-  const navigate = useNavigate();
-
+  const { createNotification } = useNotification();
   const { setUser, setToken } = useAuth();
-
   const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
   });
+
+  const navigate = useNavigate();
 
   const updateForm = (event) => {
     setForm((prev) => ({
@@ -34,16 +33,12 @@ function Register() {
 
       navigate("/");
     } catch (error) {
-      messageApi.open({
-        type: "error",
-        content: error.message,
-      });
+      createNotification("error", error.message);
     }
   };
 
   return (
     <>
-      {contextHolder}
       <div className="flex h-screen w-full flex-col items-center justify-center bg-neutral-100">
         <h2 className="mb-2 text-5xl uppercase">Register</h2>
         <div className="w-full max-w-md rounded-md bg-white p-3 shadow-sm">
