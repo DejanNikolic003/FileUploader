@@ -1,64 +1,53 @@
 import { useState } from "react";
-import { API_URL } from "../../utils/config";
 import { useNavigate } from "react-router";
+import { registerUser } from "../../services/userService";
+
+import { Button, message } from "antd";
+import { useAuth } from "../../contexts/AuthContext";
 
 function Register() {
+  const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
+
+  const { setUser, setToken } = useAuth();
+
   const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
   });
 
-  const [message, setMessage] = useState({
-    type: "success",
-    text: "",
-  });
-
-  const navigate = useNavigate();
-
-  const updateForm = (e, key) => {
+  const updateForm = (event) => {
     setForm((prev) => ({
       ...prev,
-      [key]: e.target.value,
+      [event.target.name]: event.target.value,
     }));
   };
 
-  const submitForm = async () => {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     try {
-      const request = await fetch(`${API_URL}/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: form.username,
-          email: form.email,
-          password: form.password,
-        }),
-      });
+      const result = await registerUser(form);
 
-      const response = await request.json();
-      console.log(response);
-    } catch (error) {
-      console.log(error);
+      setUser(result.user);
+      setToken(result.token);
+
+      navigate("/");
+    } catch (err) {
+      messageApi.open({
+        type: "error",
+        content: err.message,
+      });
     }
   };
 
   return (
     <>
-      <div className="flex h-screen w-full flex-col items-center justify-center bg-gray-100">
+      {contextHolder}
+      <div className="flex h-screen w-full flex-col items-center justify-center bg-neutral-100">
         <h2 className="mb-2 text-5xl uppercase">Register</h2>
-        {message && (
-          <span
-            className={
-              message.type === "error" ? "text-red-500" : "text-emerald-500"
-            }
-          >
-            {message.text}
-          </span>
-        )}
         <div className="w-full max-w-md rounded-md bg-white p-3 shadow-sm">
-          <form className="space-y-2">
+          <form className="space-y-2" onSubmit={handleSubmit}>
             <div>
               <label for="username">Username</label>
               <input
@@ -66,7 +55,7 @@ function Register() {
                 name="username"
                 className="w-full rounded-md border border-gray-200 p-1 text-sm text-neutral-500 outline-none"
                 value={form.username}
-                onChange={(e) => updateForm(e, "username")}
+                onChange={(event) => updateForm(event)}
               />
             </div>
             <div>
@@ -76,7 +65,7 @@ function Register() {
                 name="email"
                 className="w-full rounded-md border border-gray-200 p-1 text-sm text-neutral-500 outline-none"
                 value={form.email}
-                onChange={(e) => updateForm(e, "email")}
+                onChange={(event) => updateForm(event)}
               />
             </div>
             <div>
@@ -86,16 +75,12 @@ function Register() {
                 name="password"
                 className="w-full rounded-md border border-gray-200 p-1 text-sm text-neutral-500 outline-none"
                 value={form.password}
-                onChange={(e) => updateForm(e, "password")}
+                onChange={(event) => updateForm(event)}
               />
             </div>
-            <button
-              type="button"
-              className="w-full cursor-pointer rounded-md bg-emerald-500 p-2 text-white uppercase transition-all duration-300 hover:bg-emerald-600"
-              onClick={() => submitForm()}
-            >
+            <Button htmlType="submit" type="primary" className="w-full p-3">
               Register
-            </button>
+            </Button>
           </form>
         </div>
       </div>
