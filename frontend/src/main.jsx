@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import { ProtectedRoute } from "./utils/ProtectedRoute.jsx";
 import Folders from "./pages/Folders.jsx";
 import Folder from "./pages/Folder.jsx";
+import { NotificationProvider } from "./contexts/NotificationProvider.jsx";
 
 const router = createBrowserRouter([
   {
@@ -38,7 +39,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <NotificationProvider>
+        <RouterProvider router={router} />
+      </NotificationProvider>
     </AuthProvider>
   </StrictMode>,
 );
