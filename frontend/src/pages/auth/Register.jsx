@@ -22,14 +22,15 @@ function Register() {
       [event.target.name]: event.target.value,
     }));
   };
-
+  // TODO: Add check for empty data.
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const result = await register(form);
+      const { user, token } = await register(form);
 
-      setUser(result.user);
-      setToken(result.token);
+      setUser(user);
+      setToken(token);
+      localStorage.setItem("token", token);
 
       navigate("/");
     } catch (error) {
