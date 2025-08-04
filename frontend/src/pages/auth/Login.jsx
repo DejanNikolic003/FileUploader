@@ -7,14 +7,13 @@ import { useNotification } from "../../contexts/NotificationContext";
 
 function Login() {
   const { createNotification } = useNotification();
-  const navigate = useNavigate();
-
   const { setUser, setToken } = useAuth();
-
   const [form, setForm] = useState({
     username: "",
     password: "",
   });
+
+  const navigate = useNavigate();
 
   const updateForm = (event) => {
     setForm((prev) => ({
