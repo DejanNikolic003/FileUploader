@@ -113,6 +113,9 @@ export const deleteAllFilesByFolderId = async (folderId) => {
 
 const deleteFile = async (fileName) => {
   const filePath = path.join("uploads", fileName);
+
+  if (!doesFileExists(fileName)) return;
+
   await fs.unlink(filePath);
 };
 
