@@ -1,8 +1,18 @@
-import { Link, NavLink } from "react-router";
+import { Link, NavLink, useNavigate } from "react-router";
 import { useAuth } from "../../contexts/AuthContext";
+import { Button } from "antd";
 
 function Navbar() {
-  const { user } = useAuth();
+  const { user, setUser, setToken } = useAuth();
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    setUser(null);
+    setToken(null);
+
+    navigate("/login");
+  };
+
   return (
     <div className="w-full bg-gray-100 p-3">
       <div className="container mx-auto flex items-center justify-between">
@@ -10,16 +20,21 @@ function Navbar() {
           <Link to="/">FileUploader</Link>
         </div>
         <nav>
-          <ul className="space-x-2 uppercase">
+          <ul className="space-x-2">
             {user ? (
-              <NavLink
-                to="/folders"
-                className={({ isActive, isPending }) =>
-                  isActive ? "text-emerald-500" : ""
-                }
-              >
-                Folders
-              </NavLink>
+              <div className="space-x-3">
+                <NavLink
+                  to="/folders"
+                  className={({ isActive, isPending }) =>
+                    isActive ? "text-emerald-500" : ""
+                  }
+                >
+                  Folders
+                </NavLink>
+                <Button color="danger" variant="solid" onClick={handleClick}>
+                  Logout
+                </Button>
+              </div>
             ) : (
               <>
                 <NavLink
