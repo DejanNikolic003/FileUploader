@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { registerUser } from "../../services/userService";
+import { register } from "../../services/userService";
 
 import { Button, message } from "antd";
 import { useAuth } from "../../contexts/AuthContext";
@@ -27,16 +27,16 @@ function Register() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const result = await registerUser(form);
+      const result = await register(form);
 
       setUser(result.user);
       setToken(result.token);
 
       navigate("/");
-    } catch (err) {
+    } catch (error) {
       messageApi.open({
         type: "error",
-        content: err.message,
+        content: error.message,
       });
     }
   };
