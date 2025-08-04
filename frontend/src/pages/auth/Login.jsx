@@ -1,80 +1,52 @@
 import { useNavigate } from "react-router";
-import { API_URL } from "../../utils/config";
 import { useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
+import { login } from "../../services/userService";
+import { Button, message } from "antd";
 
 function Login() {
+  const [messageApi, contextHolder] = message.useMessage();
+  const navigate = useNavigate();
+
+  const { setUser, setToken } = useAuth();
+
   const [form, setForm] = useState({
     username: "",
     password: "",
   });
 
-  const { setToken, setUser } = useAuth();
-
-  const navigate = useNavigate();
-
-  const updateForm = (e, key) => {
+  const updateForm = (event) => {
     setForm((prev) => ({
       ...prev,
-      [key]: e.target.value,
+      [event.target.name]: event.target.value,
     }));
   };
 
-  const submitForm = async () => {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     try {
-      const request = await fetch(`${API_URL}/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-        credentials: "include",
-      });
+      const result = await login(form);
 
-      const response = await request.json();
-
-      if (!request.ok) {
-        console.log("NEM!");
-        return;
-      }
-
-      setToken(response.token);
-      setUser(response.user);
+      setUser(result.user);
+      setToken(result.token);
 
       navigate("/");
     } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const logout = async () => {
-    try {
-      const request = await fetch(`${API_URL}/logout`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
+      messageApi.open({
+        type: "error",
+        content: error.message,
       });
-
-      const response = await request.json();
-
-      console.log(response);
-
-      setToken(null);
-      setUser(null);
-    } catch (error) {
-      console.log(error);
     }
   };
 
   return (
     <>
+      {contextHolder}
       <div className="flex h-screen w-full flex-col items-center justify-center bg-gray-100">
         <h2 className="mb-2 text-5xl uppercase">Login</h2>
 
         <div className="w-full max-w-md rounded-md bg-white p-3 shadow-sm">
-          <form className="space-y-2">
+          <form className="space-y-2" onSubmit={handleSubmit}>
             <div>
               <label for="username">Username</label>
               <input
@@ -82,7 +54,7 @@ function Login() {
                 name="username"
                 className="w-full rounded-md border border-gray-200 p-1 text-sm text-neutral-500 outline-none"
                 value={form.username}
-                onChange={(e) => updateForm(e, "username")}
+                onChange={(event) => updateForm(event)}
               />
             </div>
             <div>
@@ -92,23 +64,12 @@ function Login() {
                 name="password"
                 className="w-full rounded-md border border-gray-200 p-1 text-sm text-neutral-500 outline-none"
                 value={form.password}
-                onChange={(e) => updateForm(e, "password")}
+                onChange={(event) => updateForm(event)}
               />
             </div>
-            <button
-              type="button"
-              className="w-full cursor-pointer rounded-md bg-emerald-500 p-2 text-white uppercase transition-all duration-300 hover:bg-emerald-600"
-              onClick={() => submitForm()}
-            >
+            <Button htmlType="submit" type="primary" className="w-full p-3">
               Login
-            </button>
-            <button
-              type="button"
-              className="w-full cursor-pointer rounded-md bg-emerald-500 p-2 text-white uppercase transition-all duration-300 hover:bg-emerald-600"
-              onClick={() => logout()}
-            >
-              Logout
-            </button>
+            </Button>
           </form>
         </div>
       </div>
