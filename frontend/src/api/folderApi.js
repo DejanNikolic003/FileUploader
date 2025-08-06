@@ -10,6 +10,16 @@ export const getFolders = async (token) => {
   });
 };
 
+export const getFolderById = async (token, id) => {
+  if (!token) return;
+
+  return await fetchClient(`/folders/${id}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+};
+
 export const createFolder = async (token, data) => {
   if (!token) return;
 
