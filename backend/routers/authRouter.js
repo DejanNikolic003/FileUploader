@@ -1,7 +1,5 @@
 import { Router } from "express";
 import { login, register, updateToken } from "../controllers/userController.js";
-// import { isAdmin, isAuthenticated } from "../middlewares/authMiddleware.js";
-
 export const authRouter = Router();
 
 authRouter.post("/register", register);

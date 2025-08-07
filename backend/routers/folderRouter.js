@@ -6,7 +6,6 @@ import {
   showFolderById,
   showFolders,
 } from "../controllers/folderController.js";
-import { isAdmin } from "../middlewares/authMiddleware.js";
 
 export const folderRouter = Router();
 
