@@ -71,8 +71,8 @@ export const login = async (req, res) => {
 
     res.cookie("token", refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: "Strict",
+      secure: false,
+      sameSite: "Lax",
     });
 
     res.status(200).json({
