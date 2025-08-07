@@ -1,88 +1,73 @@
 import { useNavigate, useParams } from "react-router";
 import Navbar from "./components/Navbar";
 import { useEffect, useState } from "react";
-import { API_URL } from "../utils/config";
 import { useAuth } from "../contexts/AuthContext";
 import { Button } from "antd";
 import Loader from "./components/Loading";
+import { getFolderById } from "../services/folderService";
+import { downloadFile, getFiles, uploadFile } from "../services/fileService";
+import { useNotification } from "../contexts/NotificationContext";
 
 function Folder() {
   const { id } = useParams();
   const { token } = useAuth();
+  const { createNotification } = useNotification();
 
   const [folder, setFolder] = useState();
   const [file, setFile] = useState(null);
   const [files, setFiles] = useState([]);
-
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${API_URL}/folders/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const { folder } = await getFolderById(token, id);
 
-        const result = await response.json();
+        setFolder(folder);
 
-        if (!response.ok) {
-          navigate("/folders");
-          return;
-        }
+        const files = await getFiles(token, folder.id);
 
-        setFolder(result.folder);
-
-        await getFiles(result.folder.id);
+        setFiles(files);
       } catch (error) {
-        console.log(error);
-      }
-    };
-
-    const getFiles = async (id) => {
-      try {
-        const response = await fetch(`${API_URL}/files/folders/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const result = await response.json();
-
-        setFiles(result.files);
-      } catch (error) {
-        console.log(error);
+        createNotification("error", error.message);
       }
     };
 
     fetchData();
   }, [token]);
 
-  const uploadFile = async () => {
+  const handleUpload = async () => {
     setLoading(true);
     try {
       if (!file) {
+        createNotification("error", "Select a file to upload!");
         return;
       }
+
       const formData = new FormData();
       formData.append("file", file);
       formData.append("folderId", folder.id);
 
-      const response = await fetch(`${API_URL}/files/upload`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
+      const result = await uploadFile(token, formData);
 
-      const result = await response.json();
+      // console.log(formData);
+      // const response = await fetch(`${API_URL}/files/upload`, {
+      //   method: "POST",
+      //   headers: {
+      //     Authorization: `Bearer ${token}`,
+      //   },
+      //   body: formData,
+      // });
 
-      console.log(result);
+      // const result = await response.json();
+
+      // messageApi.open({
+      //   type: "success",
+      //   content: result.message,
+      // });
+      setFiles((prev) => [...prev, result.file]);
     } catch (error) {
-      console.error(error);
+      createNotification("error", error.message);
     } finally {
       setLoading(false);
     }
@@ -96,26 +81,24 @@ function Folder() {
     }
   };
 
-  const downloadFile = async ({ id, original_name }) => {
+  const handleDownload = async ({ id, original_name }) => {
     try {
-      const response = await fetch(`${API_URL}/files/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const result = await downloadFile(token, id);
 
-      const result = await response.blob();
-
-      const url = window.URL.createObjectURL(result);
-      const downloadLink = document.createElement("a");
-
-      downloadLink.href = url;
-      downloadLink.download = original_name;
-      downloadLink.click();
-      window.URL.revokeObjectURL(result);
+      createDownloadLink(result, original_name);
     } catch (error) {
-      console.log(error.message);
+      createNotification("error", error.message);
     }
+  };
+
+  const createDownloadLink = (result, original_name) => {
+    const url = window.URL.createObjectURL(result);
+    const downloadLink = document.createElement("a");
+
+    downloadLink.href = url;
+    downloadLink.download = original_name;
+    downloadLink.click();
+    window.URL.revokeObjectURL(result);
   };
 
   return (
@@ -137,7 +120,7 @@ function Folder() {
               ) : (
                 <form>
                   <input type="file" name="file" onChange={onChange}></input>
-                  <Button type="primary" onClick={uploadFile}>
+                  <Button type="primary" onClick={handleUpload}>
                     Upload file
                   </Button>
                 </form>
@@ -150,7 +133,7 @@ function Folder() {
                       Uploaded at:
                       {new Date(item.created_at).toLocaleDateString("en-US")}
                     </p>
-                    <Button type="primary" onClick={() => downloadFile(item)}>
+                    <Button type="primary" onClick={() => handleDownload(item)}>
                       Download
                     </Button>
                   </div>
