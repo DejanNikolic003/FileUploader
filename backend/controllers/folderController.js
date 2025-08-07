@@ -1,13 +1,15 @@
+import { validationResult } from "express-validator";
 import * as model from "../models/Folder.js";
 import { deleteAllFilesByFolderId } from "./fileController.js";
 
 export const createFolder = async (req, res) => {
   try {
-    if (!req.body || Object.keys(req.body).length !== 1)
-      throw new Error("Invalid body type");
+    const errors = validationResult(req);
 
-    if (!req.body.folderName || typeof req.body.folderName !== "string")
-      throw new Error("Folder name field required, and must be a string!");
+    if (!errors.isEmpty()) {
+      res.status(422).json({ errors: errors.array() });
+      return;
+    }
 
     const { id } = req.user;
     const { folderName } = req.body;
@@ -83,11 +85,12 @@ export const deleteFolderById = async (req, res) => {
 
 export const editFolderById = async (req, res) => {
   try {
-    if (!req.body || Object.keys(req.body).length !== 1)
-      throw new Error("Invalid body type");
+    const errors = validationResult(req);
 
-    if (!req.body.folderName || typeof req.body.folderName !== "string")
-      throw new Error("Folder name field required, and must be a string!");
+    if (!errors.isEmpty()) {
+      res.status(422).json({ errors: errors.array() });
+      return;
+    }
 
     const { folderName } = req.body;
     const { id, is_admin } = req.user;

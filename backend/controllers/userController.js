@@ -1,17 +1,16 @@
 import bcrypt, { compare } from "bcrypt";
 import { createUser, getUserByName } from "../models/User.js";
 import { generateToken, verifyToken } from "../models/Token.js";
+import { validationResult } from "express-validator";
 
 export const register = async (req, res) => {
   try {
-    if (!req.body || Object.keys(req.body).length !== 3)
-      throw new Error("Invalid body type");
-    if (!req.body.username || typeof req.body.username !== "string")
-      throw new Error("Username field required, and must be a string!");
-    if (!req.body.email || typeof req.body.email !== "string")
-      throw new Error("Email field required, and must be a string!");
-    if (!req.body.password || typeof req.body.password !== "string")
-      throw new Error("Password field required, and must be a string!");
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.status(422).json({ errors: errors.array() });
+      return;
+    }
 
     const { username, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 8);
@@ -43,13 +42,12 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
   try {
-    if (!req.body || Object.keys(req.body).length !== 2)
-      throw new Error("Invalid body type");
-    if (!req.body.username || typeof req.body.username !== "string")
-      throw new Error("Username field required, and must be a string!");
-    if (!req.body.password || typeof req.body.password !== "string")
-      throw new Error("Password field required, and must be a string!");
+    const errors = validationResult(req);
 
+    if (!errors.isEmpty()) {
+      res.status(422).json({ errors: errors.array() });
+      return;
+    }
     const { username, password } = req.body;
 
     const user = await getUserByName(username);
