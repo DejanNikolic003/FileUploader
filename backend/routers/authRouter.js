@@ -8,5 +8,5 @@ authRouter.post("/login", validate("loginUser"), login);
 authRouter.post("/token", updateToken);
 authRouter.post("/logout", (req, res) => {
   res.cookie("token", null, { expiresIn: Date.now() });
-  res.status(200).json({ message: "Cookie deleted!" });
+  res.status(200).json({ message: "Successfully logged out!" });
 });
