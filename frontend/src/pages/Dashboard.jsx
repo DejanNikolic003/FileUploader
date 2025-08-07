@@ -1,5 +1,4 @@
 import { useAuth } from "../contexts/AuthContext";
-import Navbar from "./components/Navbar";
 
 function Dashboard() {
   const { user } = useAuth();
