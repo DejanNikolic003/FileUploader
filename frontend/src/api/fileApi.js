@@ -16,7 +16,7 @@ export const uploadFile = async (token, data) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(data),
+      body: data,
     },
     null,
   );
