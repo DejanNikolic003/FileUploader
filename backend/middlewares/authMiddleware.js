@@ -6,7 +6,7 @@ export const isAuthenticated = async (req, res, next) => {
     await authenticateToken(req, res);
 
     if (!req.user) {
-      throw new Error("nincs user patkany");
+      throw new Error("Not logged in!");
     }
 
     next();
