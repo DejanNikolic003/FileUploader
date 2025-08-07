@@ -8,7 +8,6 @@ import {
 } from "../controllers/fileController.js";
 import multer from "multer";
 import path from "path";
-import { getFolderById } from "../models/Folder.js";
 
 export const fileRouter = Router();
 const storage = multer.diskStorage({
