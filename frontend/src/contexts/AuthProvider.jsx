@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { AuthContext } from "./AuthContext.jsx";
-import { API_URL } from "../utils/config.js";
+import { verifyToken } from "../services/userService.js";
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -9,22 +9,13 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (user && token) return;
 
-    if (location.pathname === "/register" || location.pathname === "/login")
-      return;
-
     const fetchUser = async () => {
       try {
-        const request = await fetch(`${API_URL}/token`, {
-          method: "POST",
-          credentials: "include",
-        });
+        const result = await verifyToken();
 
-        const response = await request.json();
-
-        setToken(response.token);
-        setUser(response.user);
-
-        localStorage.setItem("token", response.token);
+        setToken(result.token);
+        setUser(result.user);
+        localStorage.setItem("token", result.token);
       } catch (error) {
         console.log(error);
       }
