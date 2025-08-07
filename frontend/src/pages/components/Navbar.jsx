@@ -1,14 +1,18 @@
 import { Link, NavLink, useNavigate } from "react-router";
 import { useAuth } from "../../contexts/AuthContext";
 import { Button } from "antd";
+import { logout } from "../../services/userService";
 
 function Navbar() {
   const { user, setUser, setToken } = useAuth();
   const navigate = useNavigate();
 
-  const handleClick = () => {
+  const handleLogout = async () => {
+    const result = await logout();
+
     setUser(null);
     setToken(null);
+    localStorage.removeItem("token");
 
     navigate("/login");
   };
@@ -31,7 +35,7 @@ function Navbar() {
                 >
                   Folders
                 </NavLink>
-                <Button color="danger" variant="solid" onClick={handleClick}>
+                <Button color="danger" variant="solid" onClick={handleLogout}>
                   Logout
                 </Button>
               </div>
