@@ -40,7 +40,7 @@ function Folder() {
     setLoading(true);
     try {
       if (!file) {
-        createNotification("error", "Select a file to upload!");
+        createNotification("warning", "Select a file to upload!");
         return;
       }
 
@@ -50,21 +50,7 @@ function Folder() {
 
       const result = await uploadFile(token, formData);
 
-      // console.log(formData);
-      // const response = await fetch(`${API_URL}/files/upload`, {
-      //   method: "POST",
-      //   headers: {
-      //     Authorization: `Bearer ${token}`,
-      //   },
-      //   body: formData,
-      // });
-
-      // const result = await response.json();
-
-      // messageApi.open({
-      //   type: "success",
-      //   content: result.message,
-      // });
+      createNotification("success", result.message);
       setFiles((prev) => [...prev, result.file]);
     } catch (error) {
       createNotification("error", error.message);
