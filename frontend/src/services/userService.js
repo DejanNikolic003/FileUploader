@@ -11,3 +11,15 @@ export const login = async (formData) => {
 
   return user;
 };
+
+export const logout = async () => {
+  const result = await userAPI.logout();
+
+  return result;
+};
+
+export const verifyToken = async () => {
+  const result = await userAPI.verifyToken();
+
+  return result;
+};
