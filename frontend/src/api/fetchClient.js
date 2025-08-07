@@ -1,8 +1,13 @@
 const API_URL = import.meta.env.VITE_API_URL;
 
-export const fetchClient = async (url, options = {}) => {
+export const fetchClient = async (
+  url,
+  options = {},
+  contentType = "application/json",
+  returnType = "json",
+) => {
   const headers = {
-    "Content-Type": "application/json",
+    ...(contentType ? { "Content-Type": contentType } : {}),
     ...options.headers,
   };
 
@@ -16,5 +21,7 @@ export const fetchClient = async (url, options = {}) => {
     throw new Error(errorData.message || "API error");
   }
 
-  return response.json();
+  const returnValue = returnType === "json" ? response.json() : response.blob();
+
+  return returnValue;
 };
