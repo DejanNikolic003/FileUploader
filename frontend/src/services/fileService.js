@@ -9,8 +9,6 @@ export const getFiles = async (token, id) => {
 export const uploadFile = async (token, data) => {
   const result = await fileApi.uploadFile(token, data);
 
-  // console.log(result);
-
   return result;
 };
 
