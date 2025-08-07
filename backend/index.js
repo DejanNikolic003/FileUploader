@@ -21,8 +21,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use(authRouter);
-app.use("/folders", isAuthenticated, folderRouter);
-app.use("/files", isAuthenticated, fileRouter);
+app.use(isAuthenticated);
+app.use("/folders", folderRouter);
+app.use("/files", fileRouter);
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT} `);
 });
