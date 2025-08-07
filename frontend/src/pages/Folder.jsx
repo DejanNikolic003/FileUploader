@@ -10,7 +10,7 @@ import { useNotification } from "../contexts/NotificationContext";
 
 function Folder() {
   const { id } = useParams();
-  const { token } = useAuth();
+  const { user, token } = useAuth();
   const { createNotification } = useNotification();
 
   const [folder, setFolder] = useState();
@@ -18,10 +18,17 @@ function Folder() {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         const { folder } = await getFolderById(token, id);
+
+        if (folder.user_id !== user.id) {
+          navigate("/");
+          return;
+        }
 
         setFolder(folder);
 
